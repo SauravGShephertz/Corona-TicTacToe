@@ -135,7 +135,7 @@ function scene:enterScene( event )
 	print( "1: enterScene event" )
   statusText.text = "Click to Connect to Start"
   connectButton.isVisible = true
-
+  isNewRoomCreated = false
   appWarpClient.addRequestListener("onConnectDone", scene.onConnectDone)  
   appWarpClient.addRequestListener("onDisconnectDone", scene.onDisconnectDone)  
   appWarpClient.addRequestListener("onJoinRoomDone", scene.onJoinRoomDone)  

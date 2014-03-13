@@ -231,6 +231,9 @@ function scene:enterScene( event )
   appWarpClient.addNotificationListener("onGameStarted", scene.onGameStarted)
   appWarpClient.addNotificationListener("onGameStopped", scene.onGameStopped)
   appWarpClient.addNotificationListener("onMoveCompleted", scene.onMoveCompleted)
+  isUserTurn = false
+  isGameRunning = false
+  isGameOver = false
 end
 
 function scene.onConnectDone(resultCode)
@@ -252,6 +255,7 @@ function scene.onGameStarted(sender, roomId, nextTurn)
 end
 
 function scene.onMoveCompleted(sender, roomId, nextTurn, moveData)
+  print("on move completed called"..sender.." "..nextTurn.." move data "..moveData)
   if(isGameRunning) then
     if(nextTurn == USER_NAME) then
       statusText.text = "Your Turn"
@@ -283,8 +287,8 @@ function scene.onMoveCompleted(sender, roomId, nextTurn, moveData)
       handleFinishGame("WIN", "TIME_OVER")
     end
   else
-    if(string.len(moveData)==0) then
-      handleFinishGame("LOOSE", "TIME_OVER")
+    if(sender ~= USER_NAME and string.len(moveData)==0) then
+	  handleFinishGame("LOOSE", "TIME_OVER")
     end
   end
 end
