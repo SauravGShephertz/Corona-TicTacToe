@@ -23,7 +23,8 @@ function scene:createScene( event )
   
 	statusText = display.newText( "Click to Connect to Start", 0, 0, native.systemFontBold, 24 )
 	statusText:setTextColor( 115 )
-	statusText:setReferencePoint( display.CenterReferencePoint )
+	statusText.anchorY = 0.5
+	statusText.anchorX = 0.5
 	statusText.x, statusText.y = display.contentWidth * 0.5, 50
 	screenGroup:insert( statusText )	   
   
