@@ -12,22 +12,22 @@ local scene = storyboard.newScene()
 ---------------------------------------------------------------------------------
 
 local image, statusText, connectButton
+local screenW, screenH, halfW = display.contentWidth, display.contentHeight, display.contentWidth*0.5
 
 local isNewRoomCreated = false;
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
 	local screenGroup = self.view
-	
-	display.setDefault( "background", 255, 255, 255 )
-  
-	statusText = display.newText( "Click to Connect to Start", 0, 0, native.systemFontBold, 24 )
-	statusText:setTextColor( 115 )
-	statusText.anchorY = 0.5
-	statusText.anchorX = 0.5
-	statusText.x, statusText.y = display.contentWidth * 0.5, 50
-	screenGroup:insert( statusText )	   
-  
+  local background = display.newRect( 0, 0, screenW, screenH )
+  background.anchorX = 0
+  background.anchorY = 0
+  background:setFillColor( 1 )
+
+
+  statusText = display.newText( "", screenW / 2, screenH / 2, native.systemFont, 16 )
+  statusText:setFillColor( 1, 0, 0 )
+
   connectButton =  require("widget").newButton
         {
             left = (display.contentWidth-200)/2,
@@ -61,17 +61,17 @@ end
 
 function scene.onConnectDone(resultCode)
   if(resultCode == WarpResponseResultCode.SUCCESS) then
-    statusText.text = "Joining room.."    
+    statusText.text = "Joining room.."
     appWarpClient.joinRoomInRange (1, 1, false)
   else
     statusText.text = "onConnectDone: Failed"..resultCode;
   end
-  
+
 end
 
 function scene.onDisconnectDone(resultCode)
   if(resultCode == WarpResponseResultCode.SUCCESS) then
-    statusText.text = "Click to Connect to Start"   
+    statusText.text = "Click Connect to Start"
     connectButton:setLabel("Connect")
   else
     statusText.text = "onDisconnectDone: Failed"..resultCode;
