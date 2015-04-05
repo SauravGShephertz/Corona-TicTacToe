@@ -4,6 +4,7 @@
 --
 ---------------------------------------------------------------------------------
 
+
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
 
@@ -34,10 +35,11 @@ local isGameOver = false
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
-local imagebg, imageGameBorad, statusText, detailText
+local imagebg, imageGameBoard, statusText, detailText
+local screenW, screenH, halfW, halfH= display.contentWidth, display.contentHeight, display.contentWidth*0.5, display.contentHeight * 0.5
 
 local onTouch = function (event)
-  if event.phase == "began" then 
+  if event.phase == "began" then
       if(isGameOver) then
         storyboard.gotoScene( "ConnectScene", "slideLeft", 800  )
       end
@@ -58,13 +60,13 @@ end
 function getIndex(touchX, touchY)
   if(touchX>START_X and touchX<START_X+GRID_WIDTH and touchY>START_Y and touchY<START_Y+GRID_WIDTH) then
     for i=0,2 do
-      for j=0,2 do 
-        if ( touchX>(START_X+(j*GAP)) and touchX<(START_X+(j*GAP)+GAP) 
+      for j=0,2 do
+        if ( touchX>(START_X+(j*GAP)) and touchX<(START_X+(j*GAP)+GAP)
             and touchY>(START_Y+(i*GAP)) and touchY<(START_Y+(i*GAP)+GAP) ) then
             if(ARRAY[i][j] == "-" and TYPE=="0") then
               ARRAY[i][j] = "0"
             elseif(ARRAY[i][j] == "-" and TYPE=="X") then
-              ARRAY[i][j] = "X"  
+              ARRAY[i][j] = "X"
             end
             updateUI(i, j, TYPE);
             if(isGameWon()) then
@@ -86,7 +88,7 @@ end
 function isGameWon()
   if(ARRAY[0][0]~="-" and ARRAY[0][0] == ARRAY[0][1] and ARRAY[0][0] == ARRAY[0][2]) then
     return true;
-  elseif(ARRAY[1][0]~="-" and ARRAY[1][0] == ARRAY[1][1] and ARRAY[1][0] == ARRAY[1][2]) then 
+  elseif(ARRAY[1][0]~="-" and ARRAY[1][0] == ARRAY[1][1] and ARRAY[1][0] == ARRAY[1][2]) then
     return true;
   elseif(ARRAY[2][0]~="-" and ARRAY[2][0] == ARRAY[2][1] and ARRAY[2][0] == ARRAY[2][2]) then
     return true;
@@ -94,11 +96,11 @@ function isGameWon()
     return true;
   elseif(ARRAY[0][1]~="-" and ARRAY[0][1] == ARRAY[1][1] and ARRAY[0][1] == ARRAY[2][1]) then
     return true;
-  elseif(ARRAY[0][2]~="-" and ARRAY[0][2] == ARRAY[1][2] and ARRAY[0][2] == ARRAY[2][2]) then  
+  elseif(ARRAY[0][2]~="-" and ARRAY[0][2] == ARRAY[1][2] and ARRAY[0][2] == ARRAY[2][2]) then
     return true;
-  elseif(ARRAY[0][0]~="-" and ARRAY[0][0] == ARRAY[1][1] and ARRAY[0][0] == ARRAY[2][2]) then  
+  elseif(ARRAY[0][0]~="-" and ARRAY[0][0] == ARRAY[1][1] and ARRAY[0][0] == ARRAY[2][2]) then
     return true;
-  elseif(ARRAY[0][2]~="-" and ARRAY[0][2] == ARRAY[1][1] and ARRAY[0][2] == ARRAY[2][0]) then  
+  elseif(ARRAY[0][2]~="-" and ARRAY[0][2] == ARRAY[1][1] and ARRAY[0][2] == ARRAY[2][0]) then
     return true;
   end
   return false;
@@ -116,12 +118,14 @@ function checkForDraw()
   return true;
 end
 
-function updateUI(i, j, t) 
+function updateUI(i, j, t)
   local group = display.newGroup();
   ARRAY[i][j] = t
   GAP = 256/3
-  DRAW_X = START_X + (j*GAP) + GAP/2 - OBJECT_WIDTH/2
-  DRAW_Y = START_Y + (i*GAP) + GAP/2 - OBJECT_WIDTH/2
+  local margin = (GAP - OBJECT_WIDTH) / 2
+
+  DRAW_X = START_X + (j*GAP) + GAP/2
+  DRAW_Y = START_Y + (i*GAP) + GAP/2
     if( t == "0" ) then
       object = display.newImage( "button_AI.png", DRAW_X, DRAW_Y )
       IMAGE_ARRAY[i][j] = object
@@ -131,26 +135,26 @@ function updateUI(i, j, t)
     end
 end
 
-function handleFinishGame(result, detail) 
+function handleFinishGame(result, detail)
   if(isGameRunning == false) then
     return
   end
   if (result == "WIN") then
     statusText.text = "Congrats! Game Won"
-  elseif(result == "LOOSE") then
-    statusText.text = "Oops! Game Loose"
-  elseif(result == "DRAW") then  
+  elseif(result == "LOSE") then
+    statusText.text = "Oops! Game Lose"
+  elseif(result == "DRAW") then
     statusText.text = "Match Draw"
   end
   if (detail == "OPPONENT_LEFT") then
     detailText.text = "OPPONENT_LEFT";
   elseif (detail == "TIME_OVER") then
     detailText.text = "TIME_OVER";
-  elseif (detail == "GAME_DRAW") then  
+  elseif (detail == "GAME_DRAW") then
     detailText.text = "GAME_DRAW";
-  elseif (detail == "GAME_WIN") then 
+  elseif (detail == "GAME_WIN") then
     detailText.text = "GAME_COMPLETED";
-  elseif (detail == "GAME_LOOSE") then   
+  elseif (detail == "GAME_LOSE") then
     detailText.text = "GAME_COMPLETED";
   end
   isGameRunning = false
@@ -167,26 +171,22 @@ Runtime:addEventListener("touch", onTouch);
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
-	local screenGroup = self.view
-	
-	display.setDefault( "background", 255, 255, 255 )
-  
-  imageGameBorad = display.newImage( "grid.png", START_X, START_Y )
-	screenGroup:insert( imageGameBorad )
-  
-	statusText = display.newText( "Welcome", 0, 0, native.systemFontBold, 24 )
-  detailText = display.newText( "", 0, 0, native.systemFontBold, 24 )
-  
-  statusText:setTextColor( 155 )
-	statusText:setReferencePoint( display.CenterReferencePoint )
-	statusText.x, statusText.y = display.contentWidth * 0.5, 20
-	screenGroup:insert( statusText )
-  
-  detailText:setTextColor( 155 )
-	detailText:setReferencePoint( display.CenterReferencePoint )
-	detailText.x, detailText.y = display.contentWidth * 0.5, 50
-	screenGroup:insert( detailText )
-	
+  local screenGroup = self.view
+
+  local background = display.newRect( halfW, halfH , screenW, screenH )
+  background:setFillColor( 0 )
+
+  imageGameBoard = display.newImage( "grid.png", halfW, halfH)
+
+  statusText = display.newText( "StatusText", halfW, 20, native.systemFont, 16 )
+  statusText:setFillColor( 1, 110/255, 110/255 )
+
+  detailText = display.newText( "DetailText", halfW, 50, native.systemFontBold, 24 )
+  detailText:setFillColor( 1, 110/255, 110/255 )
+
+  local myText = display.newText( "Hello, World!", display.contentCenterX, display.contentWidth / 4, native.systemFont, 40 )
+  myText:setFillColor( 1, 110/255, 110/255 )
+
   disconnectButton =  require("widget").newButton
         {
             left = (display.contentWidth-200)/2,
@@ -194,18 +194,18 @@ function scene:createScene( event )
             label = "Disconnect",
             width = 200, height = 40,
             cornerRadius = 4,
-            onEvent = function(event) 
+            onEvent = function(event)
                 if "ended" == event.phase then
                     statusText.text = "disconnecting.."
                     appWarpClient.unsubscribeRoom(ROOM_ID);
                     appWarpClient.leaveRoom(ROOM_ID);
                     appWarpClient.disconnect()
-                    storyboard.gotoScene( "ConnectScene", "slideLeft", 800 )		
+                    storyboard.gotoScene( "ConnectScene", "slideLeft", 800 )
                 end
             end
-        }   
-        
-	print( "\n2: createScene event")
+        }
+
+  print( "\n2: createScene event")
 end
 
 ----------------------------------------------------------------------
@@ -214,18 +214,18 @@ end
 
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
-	
-	print( "2: enterScene event" )
+
+  print( "2: enterScene event" )
+  print("user name? " .. USER_NAME)
 
   disconnectButton.isVisible = true
   if(ROOM_ADMIN == USER_NAME) then
     statusText.text = "Tap to start"
     TYPE = "X"
-  else
-    statusText.text = "Wait to start"
   end
-  detailText.text = ""
-  appWarpClient.addRequestListener("onConnectDone", scene.onConnectDone)        
+  statusText.text = "Wait to start"
+  detailText.text = "This code is glorious"
+  appWarpClient.addRequestListener("onConnectDone", scene.onConnectDone)
   appWarpClient.addRequestListener("onDisconnectDone", scene.onDisconnectDone)
   appWarpClient.addNotificationListener("onUserLeftRoom", scene.onUserLeftRoom)
   appWarpClient.addNotificationListener("onGameStarted", scene.onGameStarted)
@@ -240,7 +240,7 @@ function scene.onConnectDone(resultCode)
   if(resultCode ~= WarpResponseResultCode.SUCCESS) then
     statusText.text = "Connection Error.."
     storyboard.gotoScene( "ConnectScene", "slideLeft", 800  )
-  end  
+  end
 end
 
 function scene.onGameStarted(sender, roomId, nextTurn)
@@ -255,17 +255,16 @@ function scene.onGameStarted(sender, roomId, nextTurn)
 end
 
 function scene.onMoveCompleted(sender, roomId, nextTurn, moveData)
-  print("on move completed called"..sender.." "..nextTurn.." move data "..moveData)
   if(isGameRunning) then
     if(nextTurn == USER_NAME) then
       statusText.text = "Your Turn"
       isUserTurn = true
-    else 
+    else
       statusText.text = "Opponent Turn"
       isUserTurn = false
     end
   end
-   
+
   if(sender ~= USER_NAME) then
     if(string.len(moveData)>0) then
       i = string.sub(moveData, 0, string.find(moveData, "/")-1)
@@ -278,17 +277,17 @@ function scene.onMoveCompleted(sender, roomId, nextTurn, moveData)
       end
       if(string.len(data)>0) then
         if(data=="WIN") then
-          handleFinishGame("LOOSE", "GAME_LOOSE")
+          handleFinishGame("LOSE", "GAME_LOSE")
         elseif(data=="DRAW") then
           handleFinishGame("DRAW", "")
         end
       end
-    else 
+    else
       handleFinishGame("WIN", "TIME_OVER")
     end
   else
     if(sender ~= USER_NAME and string.len(moveData)==0) then
-	  handleFinishGame("LOOSE", "TIME_OVER")
+    handleFinishGame("LOSE", "TIME_OVER")
     end
   end
 end
@@ -305,16 +304,16 @@ end
 
 function scene.onDisconnectDone(resultCode)
   if(resultCode ~= WarpResponseResultCode.SUCCESS) then
-    
+
   else
-    
-  end  
+
+  end
 end
 
 -- Called when scene is about to move offscreen:
 function scene:exitScene( event )
-	
-	print( "2: exitScene event" )
+
+  print( "2: exitScene event" )
   disconnectButton.isVisible = false
   isUserTurn = false
   isGameRunning = false
@@ -337,7 +336,7 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	print( "((destroying scene 2's view))" )
+  print( "((destroying scene 2's view))" )
   display.remove(disconnectButton)
 end
 
