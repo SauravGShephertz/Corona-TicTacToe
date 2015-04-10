@@ -12,21 +12,19 @@ local scene = storyboard.newScene()
 ---------------------------------------------------------------------------------
 
 local image, statusText, connectButton
+local screenW, screenH, halfW, halfH= display.contentWidth, display.contentHeight, display.contentWidth*0.5, display.contentHeight * 0.5
 
 local isNewRoomCreated = false;
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
 	local screenGroup = self.view
-	
-	display.setDefault( "background", 255, 255, 255 )
-  
-	statusText = display.newText( "Click to Connect to Start", 0, 0, native.systemFontBold, 24 )
-	statusText:setTextColor( 115 )
-	statusText:setReferencePoint( display.CenterReferencePoint )
-	statusText.x, statusText.y = display.contentWidth * 0.5, 50
-	screenGroup:insert( statusText )	   
-  
+  local background = display.newRect( halfW, halfH, screenW, screenH )
+  background:setFillColor( 1 )
+
+  statusText = display.newText( "", screenW / 2, screenH / 2, native.systemFont, 16 )
+  statusText:setFillColor( 1, 0, 0 )
+
   connectButton =  require("widget").newButton
         {
             left = (display.contentWidth-200)/2,
@@ -34,7 +32,7 @@ function scene:createScene( event )
             label = "Connect",
             width = 200, height = 40,
             cornerRadius = 4,
-            onEvent = function(event) 
+            onEvent = function(event)
                 if "ended" == event.phase then
                     if(string.len(ROOM_ID)>0 and connectButton:getLabel() == "Back") then
                       statusText.text = "Disconnecting.."
@@ -42,7 +40,7 @@ function scene:createScene( event )
                       appWarpClient.leaveRoom(ROOM_ID)
                       appWarpClient.deleteRoom(ROOM_ID)
                       appWarpClient.disconnect()
-                    else 
+                    else
                       statusText.text = "Connecting.."
                       USER_NAME = tostring(os.clock())
                       appWarpClient.connectWithUserName(USER_NAME) -- join with a random name
@@ -50,7 +48,7 @@ function scene:createScene( event )
                 end
             end
         }
-        
+
 	print( "\n1: createScene event")
 end
 
@@ -60,17 +58,17 @@ end
 
 function scene.onConnectDone(resultCode)
   if(resultCode == WarpResponseResultCode.SUCCESS) then
-    statusText.text = "Joining room.."    
+    statusText.text = "Joining room.."
     appWarpClient.joinRoomInRange (1, 1, false)
   else
     statusText.text = "onConnectDone: Failed"..resultCode;
   end
-  
+
 end
 
 function scene.onDisconnectDone(resultCode)
   if(resultCode == WarpResponseResultCode.SUCCESS) then
-    statusText.text = "Click to Connect to Start"   
+    statusText.text = "Click Connect to Start"
     connectButton:setLabel("Connect")
   else
     statusText.text = "onDisconnectDone: Failed"..resultCode;
@@ -88,7 +86,7 @@ function scene.onJoinRoomDone(resultCode, roomId)
     appWarpClient.createTurnRoom ("TicTacToeRoom", ROOM_ADMIN, 2, roomPropertiesTable, 30)
   else
     statusText.text = "onJoinRoomDone: failed"..resultCode
-  end  
+  end
 end
 
 function scene.onCreateRoomDone(resultCode, roomId, roomName)
@@ -97,7 +95,7 @@ function scene.onCreateRoomDone(resultCode, roomId, roomName)
     appWarpClient.joinRoom(roomId)
   else
     statusText.text = "onCreateRoomDone failed"..resultCode
-  end  
+  end
 end
 
 function scene.onSubscribeRoomDone(resultCode, roomId)
@@ -110,7 +108,7 @@ function scene.onSubscribeRoomDone(resultCode, roomId)
     end
   else
     statusText.text = "subscribeRoom failed"
-  end  
+  end
 end
 
 function scene.onUserJoinedRoom(userName, roomId)
@@ -131,22 +129,22 @@ end
 
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
-	
+
 	print( "1: enterScene event" )
-  statusText.text = "Click to Connect to Start"
+  statusText.text = "Click Connect to Start"
   connectButton.isVisible = true
   isNewRoomCreated = false
-  appWarpClient.addRequestListener("onConnectDone", scene.onConnectDone)  
-  appWarpClient.addRequestListener("onDisconnectDone", scene.onDisconnectDone)  
-  appWarpClient.addRequestListener("onJoinRoomDone", scene.onJoinRoomDone)  
-  appWarpClient.addRequestListener("onCreateRoomDone", scene.onCreateRoomDone)  
-  appWarpClient.addRequestListener("onSubscribeRoomDone", scene.onSubscribeRoomDone)  
+  appWarpClient.addRequestListener("onConnectDone", scene.onConnectDone)
+  appWarpClient.addRequestListener("onDisconnectDone", scene.onDisconnectDone)
+  appWarpClient.addRequestListener("onJoinRoomDone", scene.onJoinRoomDone)
+  appWarpClient.addRequestListener("onCreateRoomDone", scene.onCreateRoomDone)
+  appWarpClient.addRequestListener("onSubscribeRoomDone", scene.onSubscribeRoomDone)
   appWarpClient.addNotificationListener("onUserJoinedRoom", scene.onUserJoinedRoom)
 end
 
 -- Called when scene is about to move offscreen:
 function scene:exitScene( event )
-	
+
 	print( "1: exitScene event" )
 
   connectButton.isVisible = false
@@ -155,7 +153,7 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
+
 	print( "((destroying scene 1's view))" )
   display.remove(connectButton)
 end
